@@ -9,8 +9,10 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 
 public class Main extends ApplicationAdapter {
@@ -18,7 +20,7 @@ public class Main extends ApplicationAdapter {
     Texture backGround;
 
     Texture flyTexture;
-    Rectangle flyHitBox;
+    Array<Rectangle> fliesHitBox;
     boolean isAlive;
 
     SpriteBatch batch;
@@ -43,9 +45,20 @@ public class Main extends ApplicationAdapter {
         flyMusic.play();
 
         flyTexture = new Texture(Gdx.files.internal("fly.png"));
-        flyHitBox = new Rectangle(800 / 2, 480 / 2, 64, 64);
         isAlive = true;
         flySound = Gdx.audio.newSound(Gdx.files.internal("touch.mp3"));
+        fliesHitBox = new Array<>();
+        int countFlies = MathUtils.random(10, 15);
+        for (int i = 0; i < countFlies; i++) {
+            Rectangle newFly = new Rectangle();
+
+            newFly.x = MathUtils.random(0, 800 - 64);
+            newFly.y = MathUtils.random(0, 480 - 64);
+            newFly.height = 64;
+            newFly.width = 64;
+
+            fliesHitBox.add(newFly);
+        }
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -63,8 +76,18 @@ public class Main extends ApplicationAdapter {
 
         batch.begin();
         batch.draw(backGround, 0, 0, 800, 480);
-        if (isAlive) {
-            batch.draw(flyTexture, 800 / 2, 480 / 2, 64, 64);
+        int size = fliesHitBox.size;
+        if (size != 0) {
+            for (int i = 0; i < size; i++) {
+                Rectangle currentFly = fliesHitBox.get(i);
+                batch.draw(
+                    flyTexture,
+                    currentFly.x,
+                    currentFly.y,
+                    currentFly.width,
+                    currentFly.height
+                );
+            }
         } else {
             font.draw(batch, "WIN!", 800 / 2, 480 / 2);
         }
@@ -73,9 +96,15 @@ public class Main extends ApplicationAdapter {
         if (Gdx.input.isTouched()) {
             touchPos.set(Gdx.input.getX(), Gdx.input.getY(), 0);
             camera.unproject(touchPos);
-            if (flyHitBox.contains(touchPos.x, touchPos.y)) {
-                isAlive = false;
-                flySound.play();
+            for (int i = 0; i < fliesHitBox.size; i++) {
+                Rectangle currentFly = fliesHitBox.get(i);
+                if (currentFly.contains(touchPos.x, touchPos.y)) {
+                    flySound.play();
+                    fliesHitBox.removeIndex(i);
+                }
+            }
+
+            if (fliesHitBox.size == 0) {
                 flyMusic.stop();
             }
         }
