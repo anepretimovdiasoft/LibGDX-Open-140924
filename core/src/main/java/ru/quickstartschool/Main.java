@@ -2,6 +2,8 @@ package ru.quickstartschool;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -26,6 +28,9 @@ public class Main extends ApplicationAdapter {
 
     BitmapFont font;
 
+    Music flyMusic;
+    Sound flySound;
+
     @Override
     public void create() {
 
@@ -33,10 +38,14 @@ public class Main extends ApplicationAdapter {
         font = new BitmapFont();
         font.getData().setScale(2);
         font.setColor(Color.BLACK);
+        flyMusic = Gdx.audio.newMusic(Gdx.files.internal("zzzzz.mp3"));
+        flyMusic.setLooping(true);
+        flyMusic.play();
 
         flyTexture = new Texture(Gdx.files.internal("fly.png"));
         flyHitBox = new Rectangle(800 / 2, 480 / 2, 64, 64);
         isAlive = true;
+        flySound = Gdx.audio.newSound(Gdx.files.internal("touch.mp3"));
 
         camera = new OrthographicCamera();
         camera.setToOrtho(false, 800, 480);
@@ -66,6 +75,8 @@ public class Main extends ApplicationAdapter {
             camera.unproject(touchPos);
             if (flyHitBox.contains(touchPos.x, touchPos.y)) {
                 isAlive = false;
+                flySound.play();
+                flyMusic.stop();
             }
         }
 
@@ -77,5 +88,7 @@ public class Main extends ApplicationAdapter {
         flyTexture.dispose();
         batch.dispose();
         font.dispose();
+        flySound.dispose();
+        flyMusic.dispose();
     }
 }
