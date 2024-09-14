@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.badlogic.gdx.utils.TimeUtils;
 
 public class Main extends ApplicationAdapter {
 
@@ -32,6 +33,11 @@ public class Main extends ApplicationAdapter {
 
     Music flyMusic;
     Sound flySound;
+
+    long timeStart, timeFinish;
+
+    int delta;
+    boolean invert;
 
     @Override
     public void create() {
@@ -65,6 +71,10 @@ public class Main extends ApplicationAdapter {
         batch = new SpriteBatch();
 
         touchPos = new Vector3();
+
+        timeStart = TimeUtils.millis();
+        delta = 1;
+        invert = true;
     }
 
     @Override
@@ -76,9 +86,8 @@ public class Main extends ApplicationAdapter {
 
         batch.begin();
         batch.draw(backGround, 0, 0, 800, 480);
-        int size = fliesHitBox.size;
-        if (size != 0) {
-            for (int i = 0; i < size; i++) {
+        if (fliesHitBox.size != 0) {
+            for (int i = 0; i < fliesHitBox.size; i++) {
                 Rectangle currentFly = fliesHitBox.get(i);
                 batch.draw(
                     flyTexture,
@@ -89,7 +98,12 @@ public class Main extends ApplicationAdapter {
                 );
             }
         } else {
-            font.draw(batch, "WIN!", 800 / 2, 480 / 2);
+            font.draw(
+                batch,
+                "WIN! Time: " + ((timeFinish - timeStart) / 1000),
+                800 / 2 - 75,
+                480 / 2
+            );
         }
         batch.end();
 
@@ -106,9 +120,19 @@ public class Main extends ApplicationAdapter {
 
             if (fliesHitBox.size == 0) {
                 flyMusic.stop();
+                timeFinish = TimeUtils.millis();
             }
         }
 
+        for (int i = 0; i < fliesHitBox.size; i++) {
+            Rectangle currentFly = fliesHitBox.get(i);
+            currentFly.x += delta;
+            currentFly.y += delta;
+        }
+        if (invert) {
+            delta = -delta;
+        }
+        invert = !invert;
     }
 
     @Override
