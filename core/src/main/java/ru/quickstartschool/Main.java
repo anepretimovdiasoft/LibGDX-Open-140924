@@ -2,33 +2,50 @@ package ru.quickstartschool;
 
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 
-/** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends ApplicationAdapter {
-    private SpriteBatch batch;
-    private Texture image;
+
+    Texture backGround;
+    Texture flyTexture;
+
+    SpriteBatch batch;
+    OrthographicCamera camera;
 
     @Override
     public void create() {
+
+        backGround = new Texture(Gdx.files.internal("background.png"));
+        flyTexture = new Texture(Gdx.files.internal("fly.png"));
+
+        camera = new OrthographicCamera();
+        camera.setToOrtho(false, 800, 480);
         batch = new SpriteBatch();
-        image = new Texture("libgdx.png");
     }
 
     @Override
     public void render() {
-        ScreenUtils.clear(0.15f, 0.15f, 0.2f, 1f);
+        ScreenUtils.clear(Color.CLEAR);
+
+        camera.update();
+        batch.setProjectionMatrix(camera.combined);
+
         batch.begin();
-        batch.draw(image, 140, 210);
+
+        batch.draw(backGround, 0, 0, 800, 480);
+        batch.draw(flyTexture, 800 / 2, 480 / 2, 64, 64);
+
         batch.end();
     }
 
     @Override
     public void dispose() {
+        backGround.dispose();
+        flyTexture.dispose();
         batch.dispose();
-        image.dispose();
     }
 }
